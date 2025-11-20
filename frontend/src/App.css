@@ -1,0 +1,143 @@
+.avatar {
+    width: 375px;
+    height: 375px;
+    margin-top: 100px;
+    margin-left: -115px;
+}
+
+.btn-primary {
+
+  background-color: #733ED1 !important;
+  border-color: #733ED1 !important;
+
+}
+
+.btn-cancel{
+
+
+    background:none;
+    border: 2px solid #733ED1;
+    border-radius: 9px;
+    color: #733ED1;
+}
+
+.btn-cancel:hover{
+
+
+    background-color: #733ED1;
+    color: #fff;
+    transition: 0.5s ease;
+   
+  
+}
+
+
+.daySelect {
+    border: 1px solid #733ED1;
+    border-radius: 12px;
+    max-width: 165px;
+    margin-left: 8px;
+}
+
+
+select option {
+  background:#733ED1; 
+  color: white;
+}
+
+.btn-card{
+
+    padding: 7px;
+    border-radius: 12px;
+    background-color: #733ED1;
+    color: white;
+    margin-top: 25px;
+    border: none;
+    font-weight: bold;
+
+}
+
+.card{
+
+  border: 3px solid #733ED1!important ;
+  background-color: #ffffff98;
+  border-radius: 12px;
+  animation: fadeIn 0.8s ease-in;
+}
+
+.list-item {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.custom-scroll {
+
+
+  scrollbar-width: thin;
+  scrollbar-color: #6c63ff33 transparent;
+
+}
+
+
+.speech-bubble {
+    position: absolute;
+    top: 12%;
+    left: 21%;
+    transform: translateX(-50%);
+    background-color: #733ED1;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-size: 14px;
+    text-align: center;
+    max-width: 270px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -9px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 10px 10px 0 10px;
+    border-style: solid;
+    border-color: #733ED1 transparent transparent transparent;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 767px) {
+
+  .avatar {
+   margin-left: 0px;
+   width: 250px;
+   height: 250px;
+
+  }
+
+ .speech-bubble {
+    position: absolute;
+    top: 1%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #733ED1;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-size: 10px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+}

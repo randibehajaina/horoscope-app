@@ -1,3 +1,30 @@
+## 💻 Installation
+
+ # Cloner le projet
+ 
+- git clone https://github.com/tonusername/horoscope-app.git
+- cd horoscope-app
+
+## Installer les dépendances frontend et backend
+
+# Frontend
+cd frontend
+npm install
+
+# Backend (proxy Express)
+cd ../backend
+npm install
+
+## Configuration de la clé API
+
+# Pour que l'application fonctionne, il est nécessaire d'obtenir une clé API de API Ninjas
+# Crée un compte sur https://api-ninjas.com/
+# Récupère ta clé API pour l’endpoint Horoscope
+# Crée un fichier .env à la racine du backend et ajoute :
+  - API_NINJAS_KEY=ta_cle_API
+  - PORT=5000
+# Important : Sans cette clé, l'application ne pourra pas récupérer les horoscopes.
+
 📌 Description
 
 Horoscope App est une application web développée avec React permettant d'afficher l'horoscope quotidien pour chacun des 12 signes astrologiques.

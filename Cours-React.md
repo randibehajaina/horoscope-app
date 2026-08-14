@@ -269,3 +269,17 @@ stdTTL  = "standard Time To Live" = durée de vie par défaut des données, en s
 Le cache peut-il avoir une durée différente pour chaque donnée ?
 
 Oui, tu peux surcharger la TTL par entrée, mais si tu ne le fais pas, chaque donnée utilise la TTL standard (stdTTL).
+
+**Context**
+
+ca serta quoi ? 
+Le Context sert à partager des données entre plusieurs composants sans avoir à passer des props partout.
+
+Exemple simple :
+Tu as un composant A → qui contient B → qui contient C.
+Tu veux envoyer une info de A jusqu’à C. Normalement tu dois passer :
+
+<A info> → <B info> → <C info>
+
+Provider = distributeur de données globales , il sert a ca 
+Il prend une prop qui s’appelle value = c’est ce qu’il partage

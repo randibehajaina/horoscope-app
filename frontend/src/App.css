@@ -1,143 +1,1219 @@
+/* ══════════════════════════════════════════════════════════════════════
+   App.css — Styles globaux de l'application Horoscope
+   ══════════════════════════════════════════════════════════════════════
+
+   Sections :
+     1. Utilitaires globaux (avatar, scrollbar, animations communes)
+     2. Bulle de dialogue (AvatarBubble)
+     3. Bouton principal "Voir mon horoscope"
+     4. Grille zodiacale (SignScroller)
+     5. Panneau résultat (ResultPanel)
+     6. Responsive mobile
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ────────────────────────────────────────────────────────────────────
+   1. UTILITAIRES GLOBAUX
+   ──────────────────────────────────────────────────────────────────── */
+
+/* ────────────────────────────────────────────────────────────────────
+   1. AVATAR + BULLE DE DIALOGUE
+   ──────────────────────────────────────────────────────────────────── */
+
+/* ─── Wrapper de l'avatar (effets relatifs/absolus) ─── */
+.avatar-wrapper {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+/* Image de l'avatar KLO */
 .avatar {
-    width: 375px;
-    height: 375px;
-    margin-top: 100px;
-    margin-left: -115px;
+  position: relative;
+  z-index: 2;
+  width: 340px;
+  height: 340px;
+  /* Levitation douce en boucle */
+  animation: avatar-float 4s ease-in-out infinite;
+  /* Halo violet autour du personnage */
+  filter:
+    drop-shadow(0 0 18px rgba(168, 85, 247, 0.6))
+    drop-shadow(0 0 40px rgba(115, 62, 209, 0.25));
 }
 
-.btn-primary {
-
-  background-color: #733ED1 !important;
-  border-color: #733ED1 !important;
-
+@keyframes avatar-float {
+  0%, 100% { transform: translateY(0px);   }
+  50%       { transform: translateY(-14px); }
 }
 
-.btn-cancel{
-
-
-    background:none;
-    border: 2px solid #733ED1;
-    border-radius: 9px;
-    color: #733ED1;
+/* ─── Aura magique au sol ─── */
+/* Se comprime quand l'avatar monte (synchronise avec avatar-float sur 4s) */
+.avatar-aura {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  width: 220px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.45);
+  filter: blur(22px);
+  z-index: 1;
+  animation: aura-sync 4s ease-in-out infinite;
+}
+@keyframes aura-sync {
+  0%, 100% { transform: translateX(-50%) scaleX(1)    scaleY(1);    opacity: 0.7; }
+  50%       { transform: translateX(-50%) scaleX(0.7)  scaleY(0.6);  opacity: 0.35; }
 }
 
-.btn-cancel:hover{
+/* ─── Etincelles flottantes ─── */
+.avatar-spark {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(216, 180, 254, 0.95);
+  box-shadow:
+    0 0 6px  rgba(168, 85, 247, 1),
+    0 0 14px rgba(168, 85, 247, 0.6);
+  z-index: 3;
+  animation-name: spark-drift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+.sp-1 { width: 8px; height: 8px; top: 22%; left: 6%;  animation-duration: 3.2s; animation-delay: 0s;   }
+.sp-2 { width: 5px; height: 5px; top: 50%; right: 5%; animation-duration: 4s;   animation-delay: 0.9s; }
+.sp-3 { width: 6px; height: 6px; top: 18%; right:16%; animation-duration: 3.6s; animation-delay: 0.4s; }
+.sp-4 { width: 4px; height: 4px; top: 65%; left: 12%; animation-duration: 2.8s; animation-delay: 1.3s; }
 
-
-    background-color: #733ED1;
-    color: #fff;
-    transition: 0.5s ease;
-   
-  
+@keyframes spark-drift {
+  0%, 100% { transform: translateY(0)     scale(1);    opacity: 0.45; }
+  50%       { transform: translateY(-20px) scale(1.5);  opacity: 1;    }
 }
 
-
-.daySelect {
-    border: 1px solid #733ED1;
-    border-radius: 12px;
-    max-width: 165px;
-    margin-left: 8px;
+/* Scrollbar fine et discrète (utilisée dans la grille + autres listes) */
+.custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(115, 62, 209, 0.4) transparent;
+}
+.custom-scroll::-webkit-scrollbar       { width: 5px; }
+.custom-scroll::-webkit-scrollbar-track { background: transparent; }
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(115, 62, 209, 0.4);
+  border-radius: 99px;
 }
 
-
-select option {
-  background:#733ED1; 
-  color: white;
+/* Animation d'apparition générique */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
 }
 
-.btn-card{
+/* ────────────────────────────────────────────────────────────────────
+   2. BULLE DE DIALOGUE (AvatarBubble)
+   ──────────────────────────────────────────────────────────────────── */
 
-    padding: 7px;
-    border-radius: 12px;
-    background-color: #733ED1;
-    color: white;
-    margin-top: 25px;
-    border: none;
-    font-weight: bold;
-
+/* ─── Bulle de dialogue glassmorphism (positionnée au-dessus de l'avatar) ─── */
+.speech-bubble {
+  position: relative;              /* Flux normal — plus d'absolute */
+  max-width: 265px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  font-size: 13.5px;
+  text-align: center;
+  color: #fff;
+  /* Fond semi-transparent + blur : s'integre dans le theme */
+  background: rgba(109, 40, 217, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(167, 139, 250, 0.45);
+  box-shadow:
+    0 4px 20px rgba(115, 62, 209, 0.35),
+    0 0 40px  rgba(115, 62, 209, 0.15),
+    inset 0 0 20px rgba(115, 62, 209, 0.08);
+  margin-bottom: 2px; /* espace entre bulle et avatar */
+  animation: bubble-appear 0.6s ease;
+}
+/* Pointe vers le BAS (pointe vers l'avatar en dessous) */
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 11px 10px 0;
+  border-style: solid;
+  border-color: rgba(109, 40, 217, 0.5) transparent transparent;
+}
+@keyframes bubble-appear {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0);    }
 }
 
-.card{
+/* ────────────────────────────────────────────────────────────────────
+   3. BOUTON PRINCIPAL "Voir mon horoscope"
+   ──────────────────────────────────────────────────────────────────── */
 
-  border: 3px solid #733ED1!important ;
-  background-color: #ffffff98;
-  border-radius: 12px;
-  animation: fadeIn 0.8s ease-in;
+.btn-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;                /* Espace entre l'icône et le texte */
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: linear-gradient(135deg, #733ED1 0%, #9333ea 50%, #6d28d9 100%);
+  box-shadow:
+    0 4px 20px rgba(115, 62, 209, 0.45),
+    0 0 40px rgba(115, 62, 209, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+@media (hover: hover) {
+  .btn-card:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 28px rgba(115, 62, 209, 0.6),
+      0 0 50px rgba(115, 62, 209, 0.3);
+  }
+}
+.btn-card:active:not(:disabled) { transform: translateY(0px); }
+.btn-card:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ─── Icône "Étoile de révélation" (RevealIcon) ─── */
+
+/* Conteneur de l'icône : zone de 20×20px, tourne lentement en continu */
+.reveal-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;             /* Ne se comprime pas si le bouton est étroit */
+  animation: ri-spin 10s linear infinite;
 }
 
-.list-item {
-  background: rgba(0, 0, 0, 0.3);
+/* Noyau central : petit cercle blanc lumineux qui pulse */
+.ri-core {
+  position: relative;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: white;
+  box-shadow:
+    0 0 6px  rgba(255,255,255,0.9),
+    0 0 14px rgba(255,255,255,0.5),
+    0 0 24px rgba(255,255,255,0.2);
+  animation: ri-core-pulse 1.5s ease-in-out infinite;
+}
+
+/* Rayon individuel : barre fine positionnée depuis le centre */
+.ri-ray {
+  position: absolute;
+  width: 2px;
+  height: 8px;
+  border-radius: 1px;
+  background: linear-gradient(to top, rgba(255,255,255,0.9), transparent);
+
+  /* Positionne le bas du rayon au centre de l'icône */
+  bottom: 50%;
+  left: 50%;
+  margin-left: -1px;          /* Centrage horizontal (-½ largeur) */
+
+  /* Pivote autour du bas du rayon (= centre de l'icône) */
+  transform-origin: 50% 100%;
+  transform: rotate(var(--angle));
+
+  /* Chaque rayon pulse légèrement avec un délai décalé → effet de vague */
+  animation: ri-ray-pulse 1.5s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+/* Rotation lente de l'étoile entière */
+@keyframes ri-spin {
+  from { transform: rotate(0deg);   }
+  to   { transform: rotate(360deg); }
+}
+
+/* Pulsation du noyau central */
+@keyframes ri-core-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 6px rgba(255,255,255,0.8), 0 0 14px rgba(255,255,255,0.4);
+  }
+  50% {
+    transform: scale(1.35);
+    box-shadow: 0 0 10px rgba(255,255,255,1), 0 0 22px rgba(255,255,255,0.7), 0 0 36px rgba(255,255,255,0.3);
+  }
+}
+
+/* Pulsation des rayons (longueur + opacité) */
+@keyframes ri-ray-pulse {
+  0%, 100% { opacity: 0.5; transform: rotate(var(--angle)) scaleY(0.7);  }
+  50%       { opacity: 1;   transform: rotate(var(--angle)) scaleY(1.25); }
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   4. GRILLE ZODIACALE (SignScroller)
+   ──────────────────────────────────────────────────────────────────── */
+
+/* Wrapper global du composant SignScroller */
+.sign-grid-wrapper {
+  width: 100%;
+}
+
+/* ─── En-tête avec titre et étoiles ─── */
+.sign-grid-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.sign-grid-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(216, 180, 254, 0.85);
+  text-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
+  margin: 0;
+}
+.sign-grid-deco {
+  font-size: 12px;
+  color: rgba(167, 139, 250, 0.7);
+  animation: deco-pulse 2s ease-in-out infinite alternate;
+}
+@keyframes deco-pulse {
+  from { opacity: 0.4; }
+  to   { opacity: 1; text-shadow: 0 0 8px rgba(168,85,247,0.8); }
+}
+
+/* ─── Grille 3 colonnes ─── */
+.sign-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 colonnes égales */
+  gap: 8px;
+  max-height: 55vh;
+  overflow-y: auto;
+  padding: 4px 2px;
+}
+
+/* ─── Carte individuelle ─── */
+.sign-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 6px 8px;
+  border-radius: 14px;
+  cursor: pointer;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+
+  /* Animation d'entrée (le délai est injecté via style inline dans le JSX) */
+  animation: cardEntry 0.4s ease both;
+
+  /* Transitions douces pour hover + active */
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease;
 }
 
-.custom-scroll {
-
-
-  scrollbar-width: thin;
-  scrollbar-color: #6c63ff33 transparent;
-
+@keyframes cardEntry {
+  from { opacity: 0; transform: scale(0.85) translateY(6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);   }
 }
 
-
-.speech-bubble {
-    position: absolute;
-    top: 12%;
-    left: 21%;
-    transform: translateX(-50%);
-    background-color: #733ED1;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 12px;
-    font-size: 14px;
-    text-align: center;
-    max-width: 270px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.speech-bubble::after {
-    content: '';
-    position: absolute;
-    bottom: -9px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-width: 10px 10px 0 10px;
-    border-style: solid;
-    border-color: #733ED1 transparent transparent transparent;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+/* Hover : monte légèrement + lueur violette */
+/* Protégé par @media (hover: hover) → ne s'applique PAS sur écrans tactiles */
+@media (hover: hover) {
+  .sign-card:hover {
+    transform: translateY(-4px) scale(1.04);
+    border-color: rgba(167, 139, 250, 0.5);
+    background: rgba(115, 62, 209, 0.18);
+    box-shadow:
+      0 8px 22px rgba(115, 62, 209, 0.28),
+      0 0 20px rgba(168, 85, 247, 0.12);
   }
 }
+
+/* État actif : mise en valeur violette forte */
+.sign-card--active {
+  border-color: #a78bfa;
+  background: rgba(115, 62, 209, 0.32);
+  box-shadow:
+    0 0 18px rgba(115, 62, 209, 0.55),
+    0 0 36px rgba(115, 62, 209, 0.25),
+    inset 0 0 12px rgba(168, 85, 247, 0.1);
+  transform: scale(1.05);
+}
+@media (hover: hover) {
+  .sign-card--active:hover {
+    transform: scale(1.05) translateY(-2px);
+  }
+}
+
+/* Lueur interne (visible uniquement si actif, rendu conditionnel dans JSX) */
+.sign-card__glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.22) 0%, transparent 70%);
+  pointer-events: none;
+  animation: glow-inner 1.5s ease-in-out infinite alternate;
+}
+@keyframes glow-inner {
+  from { opacity: 0.4; }
+  to   { opacity: 1; }
+}
+
+/* Icône du signe */
+.sign-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08); /* ✅ Fond subtil restauré */
+  padding: 6px;
+  transition: box-shadow 0.2s ease, filter 0.2s ease;
+}
+.sign-card--active .sign-card__icon {
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.7);
+  filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.5));
+}
+
+/* Symbole astrologique unicode (♈ ♉ etc.) */
+.sign-card__symbol {
+  font-size: 13px;
+  color: rgba(216, 180, 254, 0.65);
+  line-height: 1;
+}
+
+/* ── Nom du signe : élément le plus imposant de la carte ── */
+.sign-card__name {
+  font-size: 14px;           /* Plus grand que les dates */
+  font-weight: 800;          /* Extra-bold pour dominer visuellement */
+  color: rgba(255, 255, 255, 0.97);
+  letter-spacing: 0.3px;
+  text-align: center;
+  line-height: 1.1;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+.sign-card--active .sign-card__name {
+  color: #fff;
+  text-shadow: 0 0 12px rgba(216, 180, 254, 0.6);
+}
+
+/* ── Dates : lisibles mais clairement secondaires ── */
+.sign-card__dates {
+  font-size: 10px;           /* Plus petit que le nom */
+  font-weight: 500;
+  color: rgba(196, 181, 253, 0.75); /* Plus visible qu'avant */
+  letter-spacing: 0.2px;
+  text-align: center;
+  line-height: 1;
+}
+.sign-card--active .sign-card__dates {
+  color: rgba(216, 180, 254, 0.95);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   5. PANNEAU RÉSULTAT (ResultPanel)
+   ──────────────────────────────────────────────────────────────────── */
+
+/* Conteneur principal du résultat */
+.result-card {
+  width: 100%;
+  padding: 20px 22px 18px;
+  border-radius: 20px;
+  background: rgba(15, 5, 40, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(167, 139, 250, 0.25);
+  box-shadow:
+    0 0 30px rgba(115, 62, 209, 0.25),
+    0 0 60px rgba(115, 62, 209, 0.1),
+    inset 0 0 30px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.6s ease;
+}
+
+/* ─── En-tête ─── */
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Bouton retour stylé */
+.result-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1.5px solid rgba(167, 139, 250, 0.4);
+  border-radius: 99px;
+  background: rgba(115, 62, 209, 0.12);
+  color: rgba(216, 180, 254, 0.9);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+}
+@media (hover: hover) {
+  .result-back-btn:hover {
+    background: rgba(115, 62, 209, 0.28);
+    border-color: rgba(167, 139, 250, 0.7);
+    box-shadow: 0 0 14px rgba(115, 62, 209, 0.3);
+    transform: translateX(-2px);
+  }
+}
+.result-back-arrow {
+  font-size: 15px;
+  transition: transform 0.2s ease;
+}
+@media (hover: hover) {
+  .result-back-btn:hover .result-back-arrow {
+    transform: translateX(-3px);
+  }
+}
+
+/* Étoiles décoratives (haut droite) */
+.result-header-stars {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.star { color: rgba(216, 180, 254, 0.6); animation: star-shimmer 2s ease-in-out infinite; }
+.star--lg { font-size: 18px; animation-delay: 0s; }
+.star--md { font-size: 13px; animation-delay: 0.4s; }
+.star--sm { font-size: 10px; animation-delay: 0.8s; }
+@keyframes star-shimmer {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1; text-shadow: 0 0 8px rgba(168,85,247,0.8); }
+}
+
+/* ─── Icône avec anneaux ─── */
+.result-icon-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  height: 120px;
+}
+
+/* Anneaux lumineux animés autour de l'icône */
+.result-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(167, 139, 250, 0.3);
+  animation: ring-rotate 6s linear infinite;
+}
+.result-ring--outer {
+  width: 110px; height: 110px;
+  animation-duration: 8s;
+}
+.result-ring--inner {
+  width: 88px; height: 88px;
+  border-color: rgba(168, 85, 247, 0.4);
+  animation-direction: reverse;
+  animation-duration: 5s;
+}
+@keyframes ring-rotate {
+  from { transform: rotate(0deg) scale(1);    opacity: 0.6; }
+  50%  { transform: rotate(180deg) scale(1.05); opacity: 1; }
+  to   { transform: rotate(360deg) scale(1);  opacity: 0.6; }
+}
+
+/* Cercle fond de l'icône */
+.result-icon-circle {
+  position: relative;
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: rgba(115, 62, 209, 0.25);
+  border: 2px solid rgba(167, 139, 250, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 0 20px rgba(115, 62, 209, 0.5),
+    0 0 40px rgba(115, 62, 209, 0.25);
+  z-index: 2;
+}
+.result-icon-img {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.result-icon-fallback {
+  font-size: 32px;
+}
+
+/* ─── Identité du signe ─── */
+.result-identity {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* Nom + symbole */
+.result-sign-name {
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1px;
+  margin: 0 0 10px;
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+}
+.result-sign-symbol {
+  margin-left: 8px;
+  color: rgba(216, 180, 254, 0.85);
+  text-shadow: 0 0 12px rgba(168, 85, 247, 0.8);
+}
+
+/* Ligne de badges (dates + élément) */
+.result-badges {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+/* Badge générique */
+.result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+/* Badge dates de naissance */
+.result-badge--dates {
+  background: rgba(115, 62, 209, 0.2);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  color: rgba(216, 180, 254, 0.85);
+}
+
+/* ─── Cachet de date (en-tête haut-droite) ─── */
+.result-date-stamp {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: rgba(196, 181, 253, 0.65);
+  letter-spacing: 0.3px;
+  font-style: italic;
+}
+.result-date-stamp__dot {
+  font-size: 10px;
+  color: rgba(167, 139, 250, 0.5);
+  animation: deco-pulse 2s ease-in-out infinite alternate;
+}
+.result-date-stamp__text {
+  /* La première lettre (jour de semaine) en majuscule auto via CSS */
+  text-transform: capitalize;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BADGES D'ÉLÉMENTS ANIMÉS
+   Chaque élément a son propre langage visuel CSS.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Conteneur commun de tous les badges d'élément */
+.elem-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px 4px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Zone graphique de l'animation (taille fixe pour tous les éléments) */
+.elem-inner {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 22px;
+  height: 18px;
+}
+
+/* Label texte de l'élément */
+.elem-label {
+  letter-spacing: 0.3px;
+}
+
+/* ─── FEU : 3 flammes qui vacillent ─── */
+.elem-fire {
+  background: rgba(234, 88, 12, 0.15);
+  border: 1px solid rgba(251, 146, 60, 0.4);
+  color: rgba(253, 186, 116, 0.95);
+}
+
+.flame {
+  display: inline-block;
+  width: 5px;
+  height: 11px;
+  background: linear-gradient(to top, #ea580c, #fb923c, #fde68a);
+  border-radius: 50% 50% 35% 35%;
+  transform-origin: bottom center;
+  animation: flame-flicker 0.7s ease-in-out infinite alternate;
+}
+.flame--tall {
+  height: 16px;
+  width: 6px;
+  animation-delay: 0.15s;
+  animation-duration: 0.6s;
+}
+.flame:last-child {
+  animation-delay: 0.3s;
+  animation-duration: 0.8s;
+}
+
+@keyframes flame-flicker {
+  0%   { transform: scaleX(1)    scaleY(1)    rotate(-3deg); opacity: 0.9; }
+  50%  { transform: scaleX(0.88) scaleY(1.08) rotate( 1deg); opacity: 1;   }
+  100% { transform: scaleX(0.8)  scaleY(1.12) rotate( 3deg); opacity: 0.85;}
+}
+
+/* ─── EAU : vagues qui défilent + goutte ─── */
+.elem-water {
+  background: rgba(37, 99, 235, 0.15);
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  color: rgba(147, 197, 253, 0.95);
+}
+
+.water-surface {
+  position: absolute;
+  bottom: 0;
+  width: 22px;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.water-wave {
+  width: 200%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(59, 130, 246, 0.9)  0px,
+    rgba(147, 197, 253, 0.6) 6px,
+    rgba(59, 130, 246, 0.9)  12px
+  );
+  animation: wave-scroll 1.2s linear infinite;
+}
+@keyframes wave-scroll {
+  from { transform: translateX(0);     }
+  to   { transform: translateX(-50%);  }
+}
+
+/* Goutte au-dessus */
+.water-drop {
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 7px; height: 9px;
+  background: linear-gradient(to bottom, rgba(147,197,253,0.8), rgba(59,130,246,0.9));
+  border-radius: 50% 50% 60% 60% / 40% 40% 60% 60%;
+  animation: drop-fall 1.8s ease-in infinite;
+}
+@keyframes drop-fall {
+  0%   { transform: translateX(-50%) translateY(-4px); opacity: 0; }
+  20%  { opacity: 1; }
+  70%  { transform: translateX(-50%) translateY(4px);  opacity: 0.8; }
+  100% { transform: translateX(-50%) translateY(9px);  opacity: 0; }
+}
+
+/* ─── AIR : lignes de vent qui soufflent ─── */
+.elem-air {
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(165, 180, 252, 0.35);
+  color: rgba(199, 210, 254, 0.95);
+}
+
+.wind-line {
+  position: absolute;
+  height: 1.5px;
+  border-radius: 99px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(165, 180, 252, 0.9),
+    transparent
+  );
+  animation: wind-blow 1.4s ease-in-out infinite;
+}
+/* Ligne du haut : longue */
+.wind-line          { width: 85%; top:  2px; animation-delay: 0s;    }
+/* Ligne du milieu : la plus longue */
+.wind-line--mid     { width: 100%; top: 8px; animation-delay: 0.25s; }
+/* Ligne du bas : courte */
+.wind-line--short   { width: 60%; top: 14px; animation-delay: 0.5s;  }
+
+@keyframes wind-blow {
+  0%   { transform: translateX(-8px); opacity: 0;   }
+  30%  { opacity: 1;                                 }
+  70%  { opacity: 0.8;                               }
+  100% { transform: translateX(6px);  opacity: 0;   }
+}
+
+/* ─── TERRE : particules qui montent du sol ─── */
+.elem-earth {
+  background: rgba(21, 128, 61, 0.15);
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  color: rgba(134, 239, 172, 0.95);
+}
+
+.earth-core {
+  position: absolute;
+  bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 18px; height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(to top, rgba(22,101,52,0.9), rgba(74,222,128,0.6));
+  animation: core-breathe 2s ease-in-out infinite;
+}
+@keyframes core-breathe {
+  0%, 100% { transform: translateX(-50%) scaleX(1);    opacity: 0.7; }
+  50%       { transform: translateX(-50%) scaleX(1.1);  opacity: 1;   }
+}
+
+/* Particules qui s'élèvent (3 décalées avec --i) */
+.earth-particle {
+  position: absolute;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: rgba(74, 222, 128, 0.85);
+  box-shadow: 0 0 4px rgba(74, 222, 128, 0.6);
+  bottom: 4px;
+  /* Chaque particule commence à une position X différente via --i */
+  left: calc(25% + calc(var(--i) * 25%));
+  animation: particle-rise 1.8s ease-out infinite;
+  animation-delay: calc(var(--i) * 0.5s);
+}
+@keyframes particle-rise {
+  0%   { transform: translateY(0)    scale(1);   opacity: 0.9; }
+  70%  { transform: translateY(-12px) scale(0.6); opacity: 0.5; }
+  100% { transform: translateY(-18px) scale(0.2); opacity: 0;   }
+}
+
+/* Pill date retournée par l'API */
+.result-date-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 16px;
+  border-radius: 99px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(216, 180, 254, 0.7);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Séparateur runique ─── */
+.result-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+}
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.4), transparent);
+}
+.divider-gem {
+  color: rgba(216, 180, 254, 0.8);
+  font-size: 14px;
+  text-shadow: 0 0 8px rgba(168, 85, 247, 0.7);
+  animation: deco-pulse 2s ease-in-out infinite alternate;
+}
+
+/* ─── Bloc horoscope ─── */
+.result-horoscope-block {
+  position: relative;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(167, 139, 250, 0.15);
+}
+
+/* Guillemets décoratifs */
+.result-quote-mark {
+  position: absolute;
+  font-size: 72px;
+  line-height: 1;
+  color: rgba(115, 62, 209, 0.25);
+  font-family: Georgia, serif;
+  pointer-events: none;
+  user-select: none;
+}
+.result-quote-mark--open  { top: -12px;  left: 8px; }
+.result-quote-mark--close { bottom: -36px; right: 8px; }
+
+/* Texte de l'horoscope */
+.result-horoscope-text {
+  font-size: 14px;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.88);
+  font-style: italic;
+  text-align: center;
+  margin: 0;
+  position: relative; /* Au-dessus des guillemets absolus */
+  z-index: 1;
+}
+
+/* ─── Message d'erreur ─── */
+.result-error {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: rgba(252, 165, 165, 0.9);
+  font-size: 13px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* ─── Footer mystique ─── */
+.result-footer {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: rgba(167, 139, 250, 0.5);
+  text-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   6. RESPONSIVE — MULTI-BREAKPOINTS
+   ════════════════════════════════════════════════════════════════════
+
+   Breakpoints :
+     ≤ 1024px  → Tablette portrait (colonnes plus serrées)
+     ≤ 767px   → Mobile (layout empilé, 2 colonnes grille)
+     ≤ 480px   → Petit mobile (tailles réduites, 1 colonne grille)
+
+   📌 Règle clé : la bulle de dialogue (.speech-bubble) reste TOUJOURS
+      en flux normal (position: relative) pour ne jamais chevaucher
+      l'avatar. On ajuste uniquement sa taille et ses marges.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ────────────────────────────────────────────────────────────────────
+   6a. TABLETTE PORTRAIT (≤ 1024px)
+   Ajustements légers : avatar + bulle + grille légèrement réduits
+   ──────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+
+  /* Avatar réduit pour laisser plus de place à la grille */
+  .avatar {
+    width: 280px;
+    height: 280px;
+  }
+
+  /* Bulle légèrement réduite — reste en flux normal */
+  .speech-bubble {
+    max-width: 240px;
+    font-size: 12.5px;
+    padding: 12px 15px;
+  }
+
+  /* Aura proportionnelle à l'avatar réduit */
+  .avatar-aura {
+    width: 180px;
+  }
+
+  /* Icônes un peu plus petites dans la grille */
+  .sign-card__icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .sign-card__name {
+    font-size: 13px;
+  }
+
+  .sign-card__dates {
+    font-size: 9.5px;
+  }
+
+  /* Grille : gap réduit + hauteur relative au viewport */
+  .sign-grid {
+    gap: 6px;
+    max-height: 50vh;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   6b. MOBILE (≤ 767px)
+   Layout empilé : avatar + bulle au-dessus, formulaire en dessous
+   ──────────────────────────────────────────────────────────────────── */
 
 @media (max-width: 767px) {
 
+  /* ─── Avatar réduit ─── */
   .avatar {
-   margin-left: 0px;
-   width: 250px;
-   height: 250px;
-
+    width: 200px;
+    height: 200px;
+    margin-left: 0;
   }
 
- .speech-bubble {
-    position: absolute;
-    top: 1%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #733ED1;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 12px;
+  /* ─── Bulle de dialogue : flux normal, JAMAIS absolute ─── */
+  /* Positionnée naturellement au-dessus de l'avatar grâce au DOM */
+  .speech-bubble {
+    position: relative;              /* ✅ Flux normal — pas de superposition */
+    max-width: 85vw;                 /* S'adapte à la largeur de l'écran */
+    font-size: 11px;
+    padding: 10px 14px;
+    margin-bottom: 10px;             /* Espace entre la bulle et l'avatar */
+    transform: none;                 /* Annule tout transform hérité */
+    left: auto;                      /* Reset du positionnement desktop */
+  }
+
+  /* Aura au sol proportionnelle */
+  .avatar-aura {
+    width: 140px;
+    height: 24px;
+  }
+
+  /* Étincelles : rapprochées pour le format réduit */
+  .sp-1 { width: 6px; height: 6px; }
+  .sp-2 { width: 4px; height: 4px; }
+  .sp-3 { width: 5px; height: 5px; }
+  .sp-4 { width: 3px; height: 3px; }
+
+  /* ─── Grille zodiacale : 2 colonnes ─── */
+  .sign-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-height: 45vh;
+    gap: 6px;
+  }
+
+  /* Cibles tactiles — minimum 48px pour l'accessibilité */
+  .sign-card {
+    min-height: 48px;
+  }
+
+  .sign-grid-title {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+  }
+
+  .sign-card {
+    padding: 8px 4px 6px;
+  }
+
+  .sign-card__icon {
+    width: 36px;
+    height: 36px;
+    padding: 5px;
+  }
+
+  .sign-card__name {
+    font-size: 12px;
+  }
+
+  .sign-card__dates {
+    font-size: 9px;
+  }
+
+  /* ─── Bouton principal ─── */
+  .btn-card {
+    font-size: 13px;
+    padding: 12px;
+  }
+
+  /* ─── Panneau résultat ─── */
+  /* Panneau résultat scrollable sur mobile */
+  .result-card {
+    padding: 16px 14px 14px;
+    max-height: 75vh;
+    overflow-y: auto;
+  }
+
+  .result-sign-name {
+    font-size: 22px;
+  }
+
+  .result-horoscope-text {
+    font-size: 13px;
+    line-height: 1.65;
+  }
+
+  /* En-tête résultat : empiler sur petit écran si besoin */
+  .result-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Date stamp : plus petit */
+  .result-date-stamp {
     font-size: 10px;
-    text-align: center;
-    max-width: 400px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Icône résultat plus petite */
+  .result-icon-wrapper {
+    height: 100px;
+  }
+  .result-ring--outer {
+    width: 90px; height: 90px;
+  }
+  .result-ring--inner {
+    width: 72px; height: 72px;
+  }
+  .result-icon-circle {
+    width: 60px; height: 60px;
+  }
+  .result-icon-img {
+    width: 40px; height: 40px;
+  }
+
+  /* Badges plus compacts */
+  .result-badge {
+    font-size: 10px;
+    padding: 3px 10px;
+  }
+  .elem-badge {
+    font-size: 10px;
+    padding: 3px 10px 3px 6px;
+  }
+
+  /* Guillemets décoratifs plus discrets */
+  .result-quote-mark {
+    font-size: 52px;
+  }
+  .result-quote-mark--open  { top: -8px;  left: 4px;  }
+  .result-quote-mark--close { bottom: -28px; right: 4px; }
 }
 
+/* ────────────────────────────────────────────────────────────────────
+   6c. PETIT MOBILE (≤ 480px)
+   Tailles minimales pour écrans type iPhone SE, Galaxy S
+   ──────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+
+  /* Avatar encore plus petit */
+  .avatar {
+    width: 160px;
+    height: 160px;
+  }
+
+  /* Bulle compacte mais lisible */
+  .speech-bubble {
+    max-width: 90vw;
+    font-size: 10.5px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    margin-bottom: 6px;
+  }
+
+  /* Aura minimale */
+  .avatar-aura {
+    width: 110px;
+    height: 20px;
+  }
+
+  /* ─── Grille : passage en 2 colonnes plus compact ─── */
+  .sign-grid {
+    max-height: 40vh;
+    gap: 5px;
+  }
+
+  /* Cibles tactiles renforcées sur petit mobile */
+  .sign-card {
+    min-height: 48px;
+  }
+
+  .sign-grid-title {
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .sign-grid-deco {
+    font-size: 10px;
+  }
+
+  .sign-card {
+    padding: 6px 3px 5px;
+    border-radius: 10px;
+  }
+
+  .sign-card__icon {
+    width: 30px;
+    height: 30px;
+    padding: 4px;
+  }
+
+  .sign-card__name {
+    font-size: 11px;
+  }
+
+  .sign-card__dates {
+    font-size: 8px;
+  }
+
+  /* ─── Bouton ─── */
+  .btn-card {
+    font-size: 12.5px;
+    padding: 11px;
+    border-radius: 12px;
+    gap: 8px;
+  }
+
+  .reveal-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* ─── Résultat ─── */
+  .result-card {
+    padding: 14px 12px 12px;
+    border-radius: 16px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .result-sign-name {
+    font-size: 20px;
+  }
+
+  .result-horoscope-text {
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+
+  .result-horoscope-block {
+    padding: 12px 14px;
+  }
+
+  /* Bouton retour compact */
+  .result-back-btn {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  /* Footer */
+  .result-footer {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+  }
 }

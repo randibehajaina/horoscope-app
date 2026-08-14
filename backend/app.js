@@ -20,8 +20,10 @@ app.get("/horoscope/:sign", async (req, res) => {
   const { sign } = req.params;
 
   const now = new Date()
-  const pad = (n) => String(n).padStart(2,0)
-  const cacheKey = `${now.getFullYear}-${pad(now.getMonth() + 1 )}-${pad(now.getDate())}`;
+  const pad = (n) => String(n).padStart(2, 0)
+  // ✅ FIX 1 : getFullYear() avec parenthèses (était une référence de fonction)
+  // ✅ FIX 2 : clé inclut le signe pour éviter que tous les signes partagent le même cache
+  const cacheKey = `${sign}-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
 
 

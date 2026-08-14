@@ -1,173 +1,687 @@
-/* Container principal */
-.crystal-ball-container {
+/* ══════════════════════════════════════════════════════════════════════
+   CrystalBall.css — v2.0 ✨  "Sphère Mystique"
+   ══════════════════════════════════════════════════════════════════════
+
+   Architecture des couches (z-index) :
+     0  → Halos externes (derrière tout)
+     5  → Anneaux orbitaux 3D
+     10 → Boule de cristal
+     15 → Runes en orbite
+     20 → Socle + texte (devant)
+
+   Palette de couleurs :
+     Violet principal  #7c3aed / rgba(168,85,247)
+     Indigo            #6d28d9 / rgba(99,102,241)
+     Violet clair      #a78bfa / rgba(167,139,250)
+     Parme             #d8b4fe / rgba(216,180,254)
+     Rose              #f472b6 / rgba(236,72,153)
+     Or                #fbbf24
+     Bleu glacier      #60a5fa
+
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ────────────────────────────────────────────────────────────────────
+   SCÈNE PRINCIPALE
+   ──────────────────────────────────────────────────────────────────── */
+
+.mystic-scene {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  /* Padding suffisant pour que les halos ne soient pas coupés */
+  padding-top: 10px;
+  /* Hauteur minimale pour que la boule + support + texte soient toujours visibles */
+  min-height: 520px;
   justify-content: center;
-  padding: 1rem;
 }
 
-.crystal-ball-wrapper {
+/* ────────────────────────────────────────────────────────────────────
+   WRAPPER DE LA BOULE
+   Tous les éléments positionnés autour/dans la sphère sont enfants de ce wrapper.
+   Sa taille = celle de la sphère (220×220px).
+   Ses enfants absolus se centrent via top:50%/left:50% + translate(-50%,-50%).
+   ──────────────────────────────────────────────────────────────────── */
+
+.ball-wrapper {
   position: relative;
-  width: 100%;
-  max-width: 400px;
-  aspect-ratio: 1/1;
+  width: 270px;    /* Augmenté de 220 → 270px */
+  height: 270px;
+  transform-style: preserve-3d;
+  perspective: 700px;
 }
 
-/* Animation de la boule */
-.crystal-ball-animated {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  animation: bounce 2s infinite;
+/* ────────────────────────────────────────────────────────────────────
+   HALOS PULSANTS EXTERNES
+   3 anneaux de lumière concentriques derrière la boule
+   ──────────────────────────────────────────────────────────────────── */
+
+.mystic-halo {
+  position: absolute;
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* La boule elle-même */
-.crystal-ball {
+/* Halo intérieur violet vif */
+.halo-1 {
+  width: 340px; height: 340px;   /* Proportionnel à la boule 270px */
+  background: radial-gradient(circle, rgba(168,85,247,0.28) 0%, transparent 68%);
+  animation: halo-pulse 2s ease-in-out infinite;
+}
+.halo-2 {
+  width: 460px; height: 460px;
+  background: radial-gradient(circle, rgba(99,102,241,0.16) 0%, transparent 68%);
+  animation: halo-pulse 3s ease-in-out infinite reverse;
+}
+.halo-3 {
+  width: 580px; height: 580px;
+  background: radial-gradient(circle, rgba(236,72,153,0.09) 0%, transparent 68%);
+  animation: halo-pulse 4.5s ease-in-out infinite;
+  animation-delay: -1.5s;
+}
+
+@keyframes halo-pulse {
+  0%, 100% { opacity: 0.4; transform: translate(-50%,-50%) scale(1); }
+  50%       { opacity: 1;   transform: translate(-50%,-50%) scale(1.14); }
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   ANNEAUX ORBITAUX 3D
+   Ellipses simulant des orbites planétaires grâce à rotateX(72deg)
+   📌 Pour ajouter un anneau : créer .ring-d + @keyframes spin-d
+   ──────────────────────────────────────────────────────────────────── */
+
+.orbital-sys {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;          /* Le centre de l'anneau = centre de la boule */
+  transform-style: preserve-3d; /* Indispensable pour que les enfants soient en 3D */
+  z-index: 5;
+}
+
+.orbit-ring {
+  position: absolute;
+  border-radius: 50%;
+  transform-style: preserve-3d;
+}
+
+/* Anneau A : violet — tourne vers l'avant */
+.ring-a {
+  width: 310px; height: 310px;   /* Proportionnel boule 270px */
+  top: -155px; left: -155px;
+  border: 1.5px solid rgba(168,85,247,0.5);
+  box-shadow: 0 0 6px rgba(168,85,247,0.3), inset 0 0 6px rgba(168,85,247,0.1);
+  animation: spin-a 7s linear infinite;
+}
+
+/* Anneau B : bleu */
+.ring-b {
+  width: 265px; height: 265px;
+  top: -132.5px; left: -132.5px;
+  border: 1.5px solid rgba(99,102,241,0.5);
+  box-shadow: 0 0 6px rgba(99,102,241,0.3), inset 0 0 6px rgba(99,102,241,0.1);
+  animation: spin-b 5s linear infinite reverse;
+}
+
+/* Anneau C : rose — plus grand, plus lent */
+.ring-c {
+  width: 350px; height: 350px;
+  top: -175px; left: -175px;
+  border: 1px solid rgba(236,72,153,0.38);
+  box-shadow: 0 0 5px rgba(236,72,153,0.2), inset 0 0 5px rgba(236,72,153,0.08);
+  animation: spin-c 10s linear infinite;
+}
+
+/* Chaque animation inclut l'inclinaison initiale + rotation sur Y */
+@keyframes spin-a {
+  from { transform: rotateX(72deg) rotateY(0deg);                        }
+  to   { transform: rotateX(72deg) rotateY(360deg);                      }
+}
+@keyframes spin-b {
+  from { transform: rotateX(72deg) rotateZ(55deg) rotateY(0deg);         }
+  to   { transform: rotateX(72deg) rotateZ(55deg) rotateY(360deg);       }
+}
+@keyframes spin-c {
+  from { transform: rotateX(72deg) rotateZ(-38deg) rotateY(0deg);        }
+  to   { transform: rotateX(72deg) rotateZ(-38deg) rotateY(360deg);      }
+}
+
+/* Gemme lumineuse sur chaque anneau (positionnée en haut de l'anneau) */
+.orbit-gem {
+  position: absolute;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  top: -5px; left: 50%; margin-left: -5px;
+}
+.gem-gold {
+  background: #fbbf24;
+  box-shadow: 0 0 8px #fbbf24, 0 0 16px rgba(251,191,36,0.7), 0 0 28px rgba(251,191,36,0.3);
+}
+.gem-blue {
+  background: #60a5fa;
+  box-shadow: 0 0 8px #60a5fa, 0 0 16px rgba(96,165,250,0.7), 0 0 28px rgba(96,165,250,0.3);
+}
+.gem-pink {
+  background: #f472b6;
+  box-shadow: 0 0 8px #f472b6, 0 0 16px rgba(244,114,182,0.7), 0 0 28px rgba(244,114,182,0.3);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   BOULE DE CRISTAL
+   Sphère principale avec overflow:hidden pour clipper le contenu intérieur
+   ──────────────────────────────────────────────────────────────────── */
+
+.crystal-sphere {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   overflow: hidden;
-  transition: transform 0.3s ease-out;
+  z-index: 10;
+
+  /* Flottement vertical doux */
+  animation: sphere-float 3.5s ease-in-out infinite;
+
+  /* Halo extérieur multicouche */
+  box-shadow:
+    0 0 30px  rgba(168,85,247,0.7),
+    0 0 60px  rgba(168,85,247,0.35),
+    0 0 100px rgba(99,102,241,0.2),
+    inset 0 0 50px rgba(0,0,0,0.6);
 }
 
-/* Fond violet transparent */
-.crystal-ball-background {
+@keyframes sphere-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-18px); }
+}
+
+/* ─── Fond galactique ─── */
+
+/* Cœur galactique : conic-gradient qui tourne → spirale */
+.gal-core {
   position: absolute;
-  inset: 0;
+  inset: -30%;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(99, 102, 241, 0.3) 100%);
-  backdrop-filter: blur(4px);
+  filter: blur(7px);
+  animation: gal-spin 10s linear infinite;
+  background: conic-gradient(
+    from 0deg,
+    #0a0118 0%,   #3b0764 10%, #7c3aed 20%,
+    #0a0118 30%,  #1e1b4b 45%, #6d28d9 58%,
+    #0a0118 70%,  #3b0764 82%, #0a0118 100%
+  );
 }
 
-/* Effet de brillance */
-.crystal-ball-shine {
+/* Overlay galactique en sens inverse (ajoute de la profondeur) */
+.gal-overlay {
   position: absolute;
-  inset: 0;
+  inset: -15%;
   border-radius: 50%;
-  background: linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  animation: gal-spin 6s linear infinite reverse;
+  background: conic-gradient(
+    from 180deg,
+    transparent 0%,  rgba(139,92,246,0.4) 18%,
+    transparent 36%, rgba(99,102,241,0.3) 55%,
+    transparent 74%, rgba(167,139,250,0.4) 92%,
+    transparent 100%
+  );
 }
 
-/* Reflet supérieur */
-.crystal-ball-highlight {
+@keyframes gal-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── Nébuleuses ─── */
+
+/* Blob coloré flou qui dérive lentement → mix-blend-mode:screen pour superposition */
+.nebula {
   position: absolute;
-  top: 10%;
-  left: 20%;
-  width: 30%;
-  height: 20%;
-  background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
-  filter: blur(30px);
+  filter: blur(20px);
+  mix-blend-mode: screen; /* Fusion "écran" : les couleurs s'ajoutent, les noirs sont transparents */
 }
 
-/* Container des étoiles */
-.crystal-ball-stars {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  overflow: hidden;
+.neb-1 {                                   /* violet clair — haut-gauche */
+  width: 55%; height: 55%;
+  top: 6%; left: 2%;
+  background: radial-gradient(circle, rgba(216,180,254,0.55) 0%, transparent 70%);
+  animation: neb-drift 7s ease-in-out infinite;
+}
+.neb-2 {                                   /* indigo/bleu — bas-droite */
+  width: 48%; height: 48%;
+  bottom: 4%; right: 2%;
+  background: radial-gradient(circle, rgba(99,102,241,0.65) 0%, transparent 70%);
+  animation: neb-drift 8.5s ease-in-out infinite reverse;
+  animation-delay: -2.5s;
+}
+.neb-3 {                                   /* rose magenta — centre */
+  width: 40%; height: 40%;
+  top: 36%; left: 30%;
+  background: radial-gradient(circle, rgba(236,72,153,0.45) 0%, transparent 70%);
+  animation: neb-drift 6s ease-in-out infinite;
+  animation-delay: -4s;
 }
 
-/* Étoiles individuelles */
-.crystal-ball-star {
+@keyframes neb-drift {
+  0%, 100% { transform: translate(  0%,  0%)  scale(1);    opacity: 0.7; }
+  33%       { transform: translate(  8%, -6%)  scale(1.15); opacity: 1;   }
+  66%       { transform: translate( -6%,  8%)  scale(0.88); opacity: 0.55;}
+}
+
+/* ─── Étoiles scintillantes ─── */
+
+.star-dot {
   position: absolute;
   border-radius: 50%;
   background: white;
-  animation: pulse 2s infinite;
+  /* animation-duration et animation-delay injectés via style inline (JSX) */
+  animation-name: star-twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
 }
 
-/* Constellations SVG */
-.crystal-ball-constellations {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.2;
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.7); }
+  50%       { opacity: 1;    transform: scale(1.5);
+              box-shadow: 0 0 5px 1px rgba(255,255,255,0.8); }
 }
 
-/* Brume mystique */
-.crystal-ball-mist {
+/* ─── Éclairs SVG ─── */
+
+.lightning-svg {
   position: absolute;
-  inset: 0;
+  inset: 0; width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+/* Style commun à tous les éclairs */
+.bolt {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 500;
+  stroke-dashoffset: 500;         /* Commence "invisible" → l'animation le déroule */
+}
+
+/* Éclair 1 : violet clair, vertical gauche */
+.bolt-1 {
+  stroke: rgba(196,181,253,0.95); stroke-width: 1.4;
+  animation: bolt-flash 3s ease-in-out infinite;
+}
+/* Éclair 2 : parme, vertical droite */
+.bolt-2 {
+  stroke: rgba(167,139,250,0.8);  stroke-width: 1.1;
+  animation: bolt-flash 4.5s ease-in-out infinite;
+  animation-delay: -1.5s;
+}
+/* Éclair 3 : indigo, diagonal */
+.bolt-3 {
+  stroke: rgba(99,102,241,0.85);  stroke-width: 0.9;
+  animation: bolt-flash 2.8s ease-in-out infinite;
+  animation-delay: -2.1s;
+}
+
+@keyframes bolt-flash {
+  0%   { stroke-dashoffset: 500; opacity: 0;   }
+  12%  { opacity: 1;                            }  /* apparition rapide */
+  45%  { stroke-dashoffset: 0;   opacity: 0.9; }  /* tracé complet */
+  65%  { stroke-dashoffset: 0;   opacity: 0;   }  /* disparition */
+  100% { stroke-dashoffset: 0;   opacity: 0;   }  /* pause invisible */
+}
+
+/* ─── Ondes d'énergie centrifuges ─── */
+
+/* Cercle qui grossit et s'estompe depuis le centre → impression d'énergie rayonnante */
+.e-wave {
+  position: absolute;
+  width: 60px; height: 60px;
   border-radius: 50%;
+  border: 1.5px solid rgba(167,139,250,0.65);
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  animation: wave-expand 3s ease-out infinite;
+}
+/* Les 3 vagues décalées de 1s pour un flux continu */
+.wave-1 { animation-delay: 0s;  }
+.wave-2 { animation-delay: 1s;  }
+.wave-3 { animation-delay: 2s;  }
+
+@keyframes wave-expand {
+  0%   { transform: translate(-50%,-50%) scale(0.3); opacity: 0.9; }
+  100% { transform: translate(-50%,-50%) scale(3.6); opacity: 0;   }
 }
 
-.crystal-ball-mist1 {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(168, 85, 247, 0.1) 0%, transparent 100%);
-  animation: pulse 4s infinite;
-}
+/* ─── Reflets optiques de la sphère ─── */
 
-.crystal-ball-mist2 {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(139, 92, 246, 0.1) 0%, transparent 100%);
-  animation: pulse 5s infinite;
-  animation-delay: 1s;
+/* Dégradé de brillance global (angle 135°) */
+.sph-shine {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 55%);
 }
-
-/* Bordure brillante */
-.crystal-ball-border {
+/* Spot lumineux doux en haut à gauche (spécular highlight) */
+.sph-highlight {
   position: absolute;
-  inset: 0;
+  top: 7%; left: 12%;
+  width: 38%; height: 26%;
+  background: rgba(255,255,255,0.28);
   border-radius: 50%;
-  border: 4px solid rgba(216, 180, 254, 0.3);
-  box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+  filter: blur(16px);
+}
+/* Reflet secondaire en bas à droite (donne l'impression de rondeur) */
+.sph-rim {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle at 72% 78%, rgba(255,255,255,0.08) 0%, transparent 40%);
+}
+/* Bordure lumineuse périphérique */
+.sph-border {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid rgba(216,180,254,0.55);
+  box-shadow: inset 0 0 20px rgba(168,85,247,0.25);
 }
 
-/* Ombre portée */
-.crystal-ball-shadow {
+/* ────────────────────────────────────────────────────────────────────
+   RUNES EN ORBITE
+   Technique : wrapper qui tourne + enfant qui contre-tourne
+   → la rune reste droite mais suit une orbite circulaire
+   ──────────────────────────────────────────────────────────────────── */
+
+.rune-sys {
   position: absolute;
-  inset: 0;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.rune-orbit {
+  position: absolute;
+  top: 0; left: 0;
+  animation-name: rune-spin;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* La rune se place à la distance voulue + contre-tourne pour rester verticale */
+.rune-char {
+  position: absolute;
+  display: block;
+  font-size: 19px;
+  line-height: 1;
+  /* Rayon d'orbite augmenté de 140 → 170px (proportionnel à la boule 270px) */
+  transform: translateX(170px) translateY(-0.55em);
+
+  color: rgba(216,180,254,0.92);
+  text-shadow:
+    0 0 10px  rgba(168,85,247,1),
+    0 0 24px  rgba(168,85,247,0.65),
+    0 0 45px  rgba(139,92,246,0.4);
+
+  animation-name:            rune-counter;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-duration:        inherit;
+  animation-delay:           inherit;
+}
+
+/* Rotation du wrapper (sens horaire) */
+@keyframes rune-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Contre-rotation de la rune (sens anti-horaire = rune droite) */
+@keyframes rune-counter {
+  from { transform: translateX(170px) translateY(-0.55em) rotate(0deg);    }
+  to   { transform: translateX(170px) translateY(-0.55em) rotate(-360deg); }
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   SOCLE MYSTIQUE
+   ──────────────────────────────────────────────────────────────────── */
+
+.mystic-stand {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -10px;   /* Colle à la sphère */
+  z-index: 20;
+}
+
+/* Aura lumineuse sous le socle */
+.stand-glow {
+  width: 210px; height: 20px;   /* +25% */
   border-radius: 50%;
-  box-shadow: 0 20px 60px rgba(88, 28, 135, 0.5);
+  background: rgba(168,85,247,0.4);
+  filter: blur(16px);
+  animation: glow-breathe 2s ease-in-out infinite;
+}
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.45; transform: scaleX(1);    }
+  50%       { opacity: 1;    transform: scaleX(1.18); }
 }
 
-/* Support de la boule */
-.crystal-ball-stand {
-  position: absolute;
-  bottom: -40px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 66.666%;
-  height: 80px;
+/* Fût central trapézoïdal — +25% */
+.stand-shaft {
+  width: 65px; height: 40px;
+  background: linear-gradient(to bottom, rgba(109,40,217,0.75) 0%, rgba(76,29,149,0.95) 100%);
+  clip-path: polygon(12% 0%, 88% 0%, 100% 100%, 0% 100%);
 }
 
-.crystal-ball-stand-base {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to bottom, rgba(107, 33, 168, 0.5) 0%, rgba(88, 28, 135, 0.7) 100%);
-  border-radius: 0 0 100% 100%;
-  border-top: 2px solid rgba(147, 51, 234, 0.4);
+/* Base horizontale principale — +25% */
+.stand-base {
+  width: 185px; height: 20px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(76,29,149,0.65) 0%,
+    rgba(109,40,217,0.85) 20%,
+    rgba(147,51,234,0.95) 50%,
+    rgba(109,40,217,0.85) 80%,
+    rgba(76,29,149,0.65) 100%
+  );
+  box-shadow:
+    0 4px 24px rgba(168,85,247,0.5),
+    0 0 50px  rgba(168,85,247,0.25);
 }
 
-.crystal-ball-stand-top {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 75%;
-  height: 8px;
-  background: rgba(126, 34, 206, 0.6);
-  border-radius: 50%;
+/* Inscription runique — plus lisible */
+.stand-runes {
+  margin: 9px 0 0;
+  padding: 0;
+  font-size: 13px;           /* Augmenté de 11 → 13px */
+  letter-spacing: 4px;
+  color: rgba(216,180,254,0.85);
+  text-shadow: 0 0 10px rgba(168,85,247,0.9);
+  animation: rune-inscription 2.2s ease-in-out infinite alternate;
+}
+@keyframes rune-inscription {
+  from { opacity: 0.5; text-shadow: 0 0 6px  rgba(168,85,247,0.7); }
+  to   { opacity: 1;   text-shadow: 0 0 14px rgba(168,85,247,1);   }
 }
 
-/* Animations */
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
+/* ────────────────────────────────────────────────────────────────────
+   TEXTE DE CHARGEMENT (typewriter + curseur clignotant)
+   ──────────────────────────────────────────────────────────────────── */
+
+.loading-text {
+  margin-top: 28px;              /* Plus d'espace entre le support et le texte */
+  padding: 6px 20px;
+  font-size: 16px;               /* Augmenté de 13 → 16px */
+  font-style: italic;
+  font-weight: 600;              /* Plus gras = plus lisible */
+  letter-spacing: 0.6px;
+  color: rgba(230, 210, 255, 1); /* Opacité maximale */
+  text-shadow:
+    0 0 14px rgba(168,85,247,0.9),
+    0 0 30px rgba(168,85,247,0.4);
+  text-align: center;
+  min-height: 1.8em;
+  /* Fond très légèrement teinté pour lisibilité sur fond animé */
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 99px;
+  border: 1px solid rgba(167, 139, 250, 0.15);
+}
+
+/* Curseur clignotant ("|") */
+.text-cursor {
+  display: inline-block;
+  width: 2px; height: 1em;
+  background-color: rgba(216,180,254,0.9);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  border-radius: 1px;
+  animation: cursor-blink 0.85s step-end infinite;
+}
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   RESPONSIVE — Boule de cristal adaptée aux petits écrans
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Tablette (≤ 1024px) ── */
+@media (max-width: 1024px) {
+  .mystic-scene {
+    min-height: 460px;
+    padding-top: 5px;
   }
-  50% {
-    transform: translateY(-20px);
+
+  .ball-wrapper {
+    width: 230px;
+    height: 230px;
+  }
+
+  /* Anneaux orbitaux proportionnels */
+  .ring-a { width: 265px; height: 265px; top: -132.5px; left: -132.5px; }
+  .ring-b { width: 225px; height: 225px; top: -112.5px; left: -112.5px; }
+  .ring-c { width: 300px; height: 300px; top: -150px;   left: -150px;   }
+
+  /* Halos réduits */
+  .halo-1 { width: 290px; height: 290px; }
+  .halo-2 { width: 390px; height: 390px; }
+  .halo-3 { width: 490px; height: 490px; }
+
+  /* Runes : rayon d'orbite réduit */
+  .rune-char {
+    font-size: 16px;
+    transform: translateX(145px) translateY(-0.55em);
+  }
+  @keyframes rune-counter-tablet {
+    from { transform: translateX(145px) translateY(-0.55em) rotate(0deg);    }
+    to   { transform: translateX(145px) translateY(-0.55em) rotate(-360deg); }
+  }
+  .rune-char { animation-name: rune-counter-tablet; }
+
+  /* Socle proportionnel */
+  .stand-shaft { width: 55px; height: 34px; }
+  .stand-base  { width: 155px; height: 17px; }
+  .stand-glow  { width: 175px; }
+
+  .loading-text {
+    font-size: 14px;
+    margin-top: 22px;
   }
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
+/* ── Mobile (≤ 767px) ── */
+@media (max-width: 767px) {
+  .mystic-scene {
+    min-height: 400px;
+    padding-top: 0;
   }
-  50% {
-    opacity: 0.5;
+
+  .ball-wrapper {
+    width: 190px;
+    height: 190px;
+  }
+
+  /* Anneaux orbitaux */
+  .ring-a { width: 220px; height: 220px; top: -110px; left: -110px; }
+  .ring-b { width: 185px; height: 185px; top: -92.5px; left: -92.5px; }
+  .ring-c { width: 250px; height: 250px; top: -125px; left: -125px; }
+
+  /* Halos */
+  .halo-1 { width: 240px; height: 240px; }
+  .halo-2 { width: 320px; height: 320px; }
+  .halo-3 { width: 400px; height: 400px; }
+
+  /* Gemmes plus petites */
+  .orbit-gem { width: 7px; height: 7px; top: -3.5px; margin-left: -3.5px; }
+
+  /* Runes */
+  .rune-char {
+    font-size: 14px;
+    transform: translateX(120px) translateY(-0.55em);
+  }
+  @keyframes rune-counter-mobile {
+    from { transform: translateX(120px) translateY(-0.55em) rotate(0deg);    }
+    to   { transform: translateX(120px) translateY(-0.55em) rotate(-360deg); }
+  }
+  .rune-char { animation-name: rune-counter-mobile; }
+
+  /* Socle */
+  .stand-shaft { width: 45px; height: 28px; }
+  .stand-base  { width: 130px; height: 15px; }
+  .stand-glow  { width: 145px; height: 16px; }
+  .stand-runes { font-size: 11px; letter-spacing: 3px; }
+
+  .loading-text {
+    font-size: 13px;
+    margin-top: 18px;
+    padding: 5px 16px;
+  }
+}
+
+/* ── Petit mobile (≤ 480px) ── */
+@media (max-width: 480px) {
+  .mystic-scene {
+    min-height: 340px;
+  }
+
+  .ball-wrapper {
+    width: 155px;
+    height: 155px;
+  }
+
+  /* Anneaux */
+  .ring-a { width: 180px; height: 180px; top: -90px;  left: -90px;  }
+  .ring-b { width: 150px; height: 150px; top: -75px;  left: -75px;  }
+  .ring-c { width: 205px; height: 205px; top: -102.5px; left: -102.5px; }
+
+  /* Halos très réduits */
+  .halo-1 { width: 200px; height: 200px; }
+  .halo-2 { width: 260px; height: 260px; }
+  .halo-3 { width: 320px; height: 320px; }
+
+  /* Runes */
+  .rune-char {
+    font-size: 12px;
+    transform: translateX(100px) translateY(-0.55em);
+  }
+  @keyframes rune-counter-small {
+    from { transform: translateX(100px) translateY(-0.55em) rotate(0deg);    }
+    to   { transform: translateX(100px) translateY(-0.55em) rotate(-360deg); }
+  }
+  .rune-char { animation-name: rune-counter-small; }
+
+  /* Socle minimal */
+  .stand-shaft { width: 38px; height: 24px; }
+  .stand-base  { width: 110px; height: 13px; }
+  .stand-glow  { width: 120px; height: 14px; }
+  .stand-runes { font-size: 10px; letter-spacing: 2px; margin-top: 6px; }
+
+  .loading-text {
+    font-size: 12px;
+    margin-top: 14px;
+    padding: 4px 14px;
+  }
+
+  .text-cursor {
+    height: 0.85em;
   }
 }

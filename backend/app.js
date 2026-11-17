@@ -5,6 +5,7 @@ import express from "express";
 import axios from "axios";
 import cors from "cors";
 import NodeCache from "node-cache";
+import * as deepl from "deepl-node";
 
 import { clearCache } from "./utils/ClearCache.js";
 
@@ -13,6 +14,12 @@ app.use(cors());
 app.use(express.json());
 
 const cache = new NodeCache();
+
+// Initialisation du traducteur DeepL
+const getDeepLTranslator = () => {
+  const key = process.env.DEEPL_API_KEY;
+  return key ? new deepl.Translator(key) : null;
+};
 
 
 app.get("/horoscope/:sign", async (req, res) => {
@@ -54,23 +61,42 @@ app.get("/horoscope/:sign", async (req, res) => {
       return res.status(500).json({ error: "Aucun texte d'horoscope retourné par l'API Ninjas." });
     }
 
-    // Traduction avec fallback sécurisé (ne fait plus planter si MyMemory dépasse son quota)
+    // Traduction haute fidélité (DeepL en priorité + Google en secours)
     let finalText = englishText;
-    try {
-      const resTranslated = await axios.get("https://api.mymemory.translated.net/get", {
-        params: {
-          q: englishText,
-          langpair: "en|fr",
-        },
-        timeout: 6000,
-      });
 
-      const translated = resTranslated.data?.responseData?.translatedText;
-      if (translated && !resTranslated.data?.quotaFinished) {
-        finalText = translated;
+    // 1. DeepL (Qualité premium naturelle, non mot-à-mot)
+    const translator = getDeepLTranslator();
+    if (translator) {
+      try {
+        const result = await translator.translateText(englishText, null, "fr");
+        if (result && result.text) {
+          finalText = result.text;
+        }
+      } catch (deepLErr) {
+        console.warn("⚠️ DeepL temporairement indisponible :", deepLErr.message);
       }
-    } catch (transErr) {
-      console.warn("⚠️ Échec de la traduction, conservation du texte anglais :", transErr.message);
+    }
+
+    // 2. Moteur de secours : Google Translate (si DeepL non configuré ou quota épuisé)
+    if (finalText === englishText) {
+      try {
+        const gRes = await axios.get("https://translate.googleapis.com/translate_a/single", {
+          params: {
+            client: "gtx",
+            sl: "en",
+            tl: "fr",
+            dt: "t",
+            q: englishText,
+          },
+          timeout: 5000,
+        });
+
+        if (gRes.data && Array.isArray(gRes.data[0])) {
+          finalText = gRes.data[0].map((item) => item[0]).join("");
+        }
+      } catch (gErr) {
+        console.warn("⚠️ Moteur de secours indisponible :", gErr.message);
+      }
     }
 
     const lastData = { ...response.data, horoscope: finalText };

@@ -131,12 +131,23 @@ function InnerApp() {
       - position: relative → nécessaire pour le positionnement absolu
         de la bulle de dialogue (AvatarBubble / speech-bubble dans App.css)
     */
-    <div className="container-fluid min-vh-100 d-flex px-3" style={{ position: "relative" }}>
+    <div className="container-fluid min-vh-100 d-flex flex-column px-3 py-2 py-md-3" style={{ position: "relative" }}>
 
-      <div className="row w-100 justify-content-center align-items-center">
+      {/* ── En-tête avec Logo AstroScope ── */}
+      <header className="app-header">
+        <img
+          src="/AstroScope_logo.png"
+          alt="AstroScope Logo"
+          className="app-logo"
+          onClick={handleBack}
+          title="AstroScope - Retour à l'accueil"
+        />
+      </header>
+
+      <div className="row w-100 justify-content-center align-items-center flex-grow-1">
 
         {/* ── Colonne gauche : bulle en haut, avatar en bas avec effets ── */}
-        <div className="col-12 col-md-4 d-flex flex-column align-items-center mb-4 mb-md-0">
+        <div className="col-12 col-md-5 col-lg-4 d-flex flex-column align-items-center mb-4 mb-md-0 avatar-col">
 
           {/*
             Bulle de dialogue AVANT l'avatar dans le DOM
@@ -159,13 +170,13 @@ function InnerApp() {
             <span className="avatar-spark sp-4" aria-hidden="true" />
 
             {/* Image de l'avatar KLO */}
-            <img src="/avatar-horoscope.png" alt="Avatar KLO" className="avatar" />
+            <img src="/avatar-horoscope.webp" alt="Avatar KLO" className="avatar" />
           </div>
 
         </div>
 
         {/* ── Colonne droite : formulaire OU résultats ── */}
-        <div className="col-12 col-md-6">
+        <div className="col-12 col-md-7 col-lg-6">
           {/*
             Logique d'affichage (priorité de gauche à droite) :
             1. Si loading=true  → affiche la boule de cristal (loader)

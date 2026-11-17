@@ -12,12 +12,104 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 /* ────────────────────────────────────────────────────────────────────
+   0. EN-TÊTE & LOGO (UI/UX Optimisé)
+   ──────────────────────────────────────────────────────────────────── */
+.app-header {
+  position: absolute;
+  top: 2px;
+  left: 6px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  pointer-events: none; /* Ne bloque pas les clics sur les éléments en dessous */
+}
+
+.app-logo {
+  height: 115px; /* Taille raffinée et proportionnée */
+  width: auto;
+  object-fit: contain;
+  cursor: pointer;
+  pointer-events: auto; /* Clic interactif pour revenir à l'accueil */
+  filter: drop-shadow(0 0 16px rgba(168, 85, 247, 0.65));
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+  user-select: none;
+}
+
+.app-logo:hover {
+  transform: scale(1.06) rotate(-1.5deg);
+  filter: drop-shadow(0 0 26px rgba(192, 132, 252, 0.95));
+}
+
+/* ─── Tablette (768px – 991px) ─── */
+@media (max-width: 991px) and (min-width: 768px) {
+  .app-header {
+    top: 4px;
+    left: 8px;
+  }
+  .app-logo {
+    height: 95px;
+  }
+}
+
+/* ─── Mobile (≤ 767px) : Le logo passe centré en tête de page ─── */
+@media (max-width: 767px) {
+  .app-header {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    justify-content: center;
+    padding-top: 12px;
+    padding-bottom: 0;
+    margin-bottom: -12px; /* Absorbe le padding transparent inférieur du PNG */
+  }
+  .app-logo {
+    height: 80px;
+  }
+}
+
+/* ─── Très petit mobile (≤ 480px) ─── */
+@media (max-width: 480px) {
+  .app-header {
+    padding-top: 8px;
+    margin-bottom: -16px;
+  }
+  .app-logo {
+    height: 70px;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────
    1. UTILITAIRES GLOBAUX
    ──────────────────────────────────────────────────────────────────── */
 
 /* ────────────────────────────────────────────────────────────────────
    1. AVATAR + BULLE DE DIALOGUE
    ──────────────────────────────────────────────────────────────────── */
+
+/* ─── Colonne globale Avatar + Bulle (décalage vertical harmonieux) ─── */
+.avatar-col {
+  padding-top: 42px; /* Fait descendre l'avatar et sa bulle pour équilibrer la vue */
+  transition: padding-top 0.3s ease;
+}
+
+@media (max-width: 991px) and (min-width: 768px) {
+  .avatar-col {
+    padding-top: 28px;
+  }
+}
+
+@media (max-width: 767px) {
+  .avatar-col {
+    padding-top: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .avatar-col {
+    padding-top: 4px;
+  }
+}
 
 /* ─── Wrapper de l'avatar (effets relatifs/absolus) ─── */
 .avatar-wrapper {

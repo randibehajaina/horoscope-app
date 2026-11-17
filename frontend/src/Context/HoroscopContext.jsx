@@ -24,8 +24,8 @@ export const HoroscopContext = createContext();
 
 // ─── URL du backend ──────────────────────────────────────────────────
 // Centraliser l'URL ici permet de la modifier en un seul endroit
-// (ex : en prod, remplacer par l'URL du serveur déployé)
-const API_BASE_URL = "http://localhost:5000";
+// En prod (Vercel) : utilise VITE_API_URL, en local : repli sur localhost:5000
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // ─── Provider ────────────────────────────────────────────────────────
 // HoroscopProvider enveloppe l'app et donne accès au contexte

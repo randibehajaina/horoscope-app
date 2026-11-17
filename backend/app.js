@@ -38,37 +38,51 @@ app.get("/horoscope/:sign", async (req, res) => {
 
 
   try {
+    const apiKey = process.env.API_NINJAS_KEY;
+    if (!apiKey) {
+      console.error("❌ ERREUR: La variable API_NINJAS_KEY n'est pas définie dans l'environnement !");
+      return res.status(500).json({ error: "API_NINJAS_KEY manquante dans l'environnement du serveur." });
+    }
+
     const response = await axios.get("https://api.api-ninjas.com/v1/horoscope", {
-      params: { zodiac:sign },
-      headers: { "X-Api-Key": process.env.API_NINJAS_KEY },
+      params: { zodiac: sign },
+      headers: { "X-Api-Key": apiKey },
     });
 
-    const englishText = response.data.horoscope;
+    const englishText = response.data?.horoscope;
+    if (!englishText) {
+      return res.status(500).json({ error: "Aucun texte d'horoscope retourné par l'API Ninjas." });
+    }
 
-    const resTranslated = await axios.get("https://api.mymemory.translated.net/get", {
+    // Traduction avec fallback sécurisé (ne fait plus planter si MyMemory dépasse son quota)
+    let finalText = englishText;
+    try {
+      const resTranslated = await axios.get("https://api.mymemory.translated.net/get", {
+        params: {
+          q: englishText,
+          langpair: "en|fr",
+        },
+        timeout: 6000,
+      });
 
-      params: {
-        q: englishText,
-        langpair: "en|fr",
-     
-      },
-    });
+      const translated = resTranslated.data?.responseData?.translatedText;
+      if (translated && !resTranslated.data?.quotaFinished) {
+        finalText = translated;
+      }
+    } catch (transErr) {
+      console.warn("⚠️ Échec de la traduction, conservation du texte anglais :", transErr.message);
+    }
 
-    const frenchText = resTranslated.data.responseData.translatedText
-    let lastData 
+    const lastData = { ...response.data, horoscope: finalText };
+    cache.set(cacheKey, lastData, clearCache());
+    return res.json(lastData);
 
-    if(resTranslated.data.quotaFinished){
-
-      lastData = {...response.data}
-
-    }else{lastData = {...response.data , horoscope : frenchText}}
-    
-    cache.set(cacheKey, lastData , clearCache())
-    res.json(lastData)
-    
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+    const errorDetails = err.response?.data || err.message;
+    console.error("❌ Erreur serveur :", errorDetails);
+    return res.status(500).json({
+      error: typeof errorDetails === "object" ? JSON.stringify(errorDetails) : errorDetails,
+    });
   }
 });
 
